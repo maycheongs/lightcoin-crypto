@@ -1,15 +1,59 @@
-let balance = 500.00;
 
-class Withdrawal {
+class Account {
+  constructor (username) {
+    this._username = username;
+    this._transactions = [];
+  }
 
-  constructor(amount) {
+  get balance() {
+    let bal = 0;
+    for (let trans of this._transactions) {
+      bal += trans.value;
+    }
+    return bal;
+  }
+
+  get transactions() {
+    return this._transactions;
+  }
+
+  addTransaction (transaction) {
+    this._transactions.push(transaction);
+  }
+}
+
+class Transaction {
+  constructor (amount,account) {
     this.amount = amount;
+    this.account = account;
   }
 
   commit() {
-    balance -= this.amount;
+    if (this.isAllowed()) {
+    this.time = new Date();
+    this.account.addTransaction(this); //add itself array of transactions.
+    }
+  }
+}
+
+class Deposit extends Transaction {
+  get value() {
+    return this.amount;
   }
 
+  isAllowed () {
+    return true;
+  }
+}
+
+class Withdrawal extends Transaction {
+  get value() {
+    return -this.amount;
+  }
+
+  isAllowed () {
+    return (this.account.balance >= this.amount);
+  }
 }
 
 
@@ -18,12 +62,13 @@ class Withdrawal {
 // DRIVER CODE BELOW
 // We use the code below to "drive" the application logic above and make sure it's working as expected
 
-t1 = new Withdrawal(50.25);
+const account1 = new Account('user1');
+t1 = new Deposit(100,account1);
 t1.commit();
-console.log('Transaction 1:', t1);
 
-t2 = new Withdrawal(9.99);
+
+t2 = new Withdrawal(15, account1);
 t2.commit();
-console.log('Transaction 2:', t2);
 
-console.log('Balance:', balance);
+
+console.log("BALANCE:",account1.balance)
